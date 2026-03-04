@@ -31,7 +31,4 @@ thirdorder_vasp.py sow 4 4 4 -3 # 4 4 4 means the extend cell size, while -3 mea
 sbatch thirdorder_job.sh #or python Run_lammps_3rd.py
 find job* -name vasprun.xml|sort -n|thirdorder_vasp.py reap 4 4 4 -3
 
-or 
-sbatch thirdorder_job.sh
-
 Finally, use the CONTROL, FORCE_CONSTANT_2ND and FORCE_CONSTANTS_3RD to implement the ShengBTE!  
