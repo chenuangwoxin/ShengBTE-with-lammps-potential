@@ -50,7 +50,7 @@
 &end
 
 &flags
-    nonanalytic = .False.
+    nonanalytic = .ture.
     convergence = .true.
     isotopes = .true.
     autoisotopes = .true.
