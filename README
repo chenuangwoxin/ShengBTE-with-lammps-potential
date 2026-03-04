@@ -1,0 +1,37 @@
+Some Scripts for calculating thermal conductivity while force consants are calculated by lammps emprical potential.
+Firstly, the original stucture (data.lmp) are relaxed by the in.relax.
+bash: 
+lmp -in in.relax
+
+Secondly, use the ase package to convert the relaxed structure format to the POSCAR.
+bash: 
+python
+from ase.io import read, write
+a = read("mini.dat", format="lammps-data")
+a.write("POSCAR2", format="vasp")
+quit()
+
+After that, make the directionary for 2nd force constants, than move the POSCAR2 as POSCAR. Use the Phonopy to create the 2nd force constants, and finally use the Run_Lammps_2nd.py to create the FORCE_SETS.
+bash:
+mkdir 2nd
+cd 2nd
+mv ../POSCAR2 POSCAR
+phonopy -d --dim="4 4 4"-c POSCAR
+python Run_Lammps_2nd.py
+phonopy --dim="4 4 4"-c POSCAR band.conf -p -s # to create the FORCE_CONSTANTS format file and plot the phonon dispersion to validate the 2nd force constants
+
+the FORCE_CONSTANTS than be moved to FORCE_CONSTANTS_2ND
+
+After that, make the directionary for 3rd force constants, than move the POSCAR2 as POSCAR. Use the thirdorder_vasp.py to create the displaced supercells. Than use the Run_Lammps_3rd.py (with lammps in) to calculate the forces of these atoms in supercells and convert the forces information in dump.frc to the vasprun.xml. Finally, use the thirdorder_vasp.py to create the FORCE_CONSTANTS_3RD.
+bash:
+mkdir 3rd
+cd 3rd
+mv ../POSCAR2 POSCAR
+thirdorder_vasp.py sow 4 4 4 -3 # 4 4 4 means the extend cell size, while -3 means the 3rd cell cutoff, if the last number is positive, it means the absult cutoff distance in the unit of nm
+sbatch thirdorder_job.sh #or python Run_lammps_3rd.py
+find job* -name vasprun.xml|sort -n|thirdorder_vasp.py reap 4 4 4 -3
+
+or 
+sbatch thirdorder_job.sh
+
+Finally, use the CONTROL, FORCE_CONSTANT_2ND and FORCE_CONSTANTS_3RD to implement the ShengBTE!  

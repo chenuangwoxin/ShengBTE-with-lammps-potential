@@ -1,0 +1,36 @@
+units             metal
+dimension         3
+newton            on
+boundary          p  p  p
+atom_style        charge
+read_data         data.lmp
+
+set type 1 charge  1.4
+set	type 2 charge -1.4
+
+mass        1  24.30500
+mass        2  15.99940
+
+
+comm_modify vel yes
+
+#-------------------pair potential-------------------------------------
+pair_style    born/coul/long 10 10.0
+kspace_style pppm 1.0e-4
+# Define variables for original parameters for clarity and reusability
+variable P11 string "0.00450987 0.104 2.0266 0 0"
+variable P12 string "0.00875955 0.202 2.8153 0 0"
+variable P22 string "0.01301  0.3 3.604  30.2222169 0"
+
+# --- Original types (and their interactions) ---
+# These are still needed for atoms in the middle region
+pair_coeff  1 1  ${P11}
+pair_coeff  1 2  ${P12}
+pair_coeff  2 2  ${P22}
+
+neighbor		1.0 bin
+neigh_modify	delay 0 every 1 check yes
+
+dump 1 all custom 1 dump.frc id fx fy fz
+dump_modify 1 sort id
+run 1
